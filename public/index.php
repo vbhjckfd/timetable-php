@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 use Endroid\QrCode\QrCode;
 
+\date_default_timezone_set('Europe/Kiev');
+
 define('K_TCPDF_THROW_EXCEPTION_ERROR', true);
 
 $app = new Silex\Application();
@@ -81,26 +83,37 @@ $app->post('/partners/startmobile', function(Request $request) use ($app) {
             $timetable[$row['route']] = [];
         }
 
-        $timetable[$row['route']][] = $row['seconds_left'];
+        $future = (new DateTime())->add(new \DateInterval('PT'. $row['seconds_left'] .'S'));
+        $diff = $future->diff(new \DateTime());
+
+        $timetable[$row['route']][] = $diff;
     });
 
-    /*
-<message>
-    <service type="type" timestamp="message_timestamp" auth="authorization_line" request_id=”id” />
-    <from>+380675106567</from>
-    <to>2215</to>
-    <body content-type="text-plain" encoding="plain">
-    ɬɟɤɫɬɫɨɨɛɳɟɧɢɹ
-        </body>
-</message>
-    */
+    \ksort($timetable, \SORT_LOCALE_STRING);
 
-    $response = new \SimpleXMLElement('<answer/>');
-        $response->addAttribute('type', 'sync');
-    $response->addChild('body', print_r($timetable, 1));
-        $response->addAttribute('paid', 'false');
+    $timetable = array_map(function($key, $row) {
+        return $key . ': ' . \implode(', ', \array_map(function(\DateInterval $interval){
+            return $interval->format((0 == $interval->format('%i')) ? '< 1m' : '%im');
+        }, $row));
+    }, array_keys($timetable), $timetable);
+    $timetable = \implode(\PHP_EOL, $timetable);
 
-    return $response->asXML();
+    $writer = new \XMLWriter();
+    $writer->openMemory();
+    $writer->startDocument('1.0','UTF-8');
+    $writer->setIndent(4);
+
+    $writer->startElement('answer');
+        $writer->writeAttribute('type', 'sync');
+        $writer->startElement('body');
+            $writer->writeAttribute('paid', 'false');
+            $writer->writeCData($timetable);
+        $writer->endElement();
+    $writer->endElement();
+    $writer->endDocument();
+    $xml = $writer->flush();
+
+    return new Response($xml, Response::HTTP_OK, ['Content-Type' => 'application/xml']);
 });
 
 $app->run();
