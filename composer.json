@@ -1,0 +1,17 @@
+{
+    "name": "vbhjckfd/timetable-php",
+    "description": "Php part for timetable",
+    "license": "MIT",
+    "type": "project",
+    "require": {
+        "php": ">=5.5.30",
+        "silex/silex": "~2.0",
+        "guzzlehttp/guzzle": "~6.0",
+        "twig/twig": "~1.0",
+        "endroid/qrcode": "^1.7",
+        "tecnickcom/tcpdf": "^6.2"
+    },
+    "autoload": {
+        "psr-0": { "": "src/" }
+    }
+}
