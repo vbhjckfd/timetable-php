@@ -89,14 +89,17 @@ $app->post('/partners/startmobile', function(Request $request) use ($app) {
     \ksort($timetable, \SORT_LOCALE_STRING);
 
     $timetable = array_map(function($key, $row) {
-        $result =  $key . ': ' . \implode(', ', $row);
+        $result =  $key . ': ' . \implode(', ', \array_slice($row, 0, 2));
 
         $result = \str_replace(['Тр', 'А', 'Т', 'Н', 'хв'], ['Tp', 'A', 'T', 'H', 'm'], $result);
         $result = \str_replace(' m', 'm', $result);
 
         return $result;
     }, array_keys($timetable), $timetable);
-    $timetable = \implode(\PHP_EOL, $timetable);
+
+    while(strlen($timetable = \implode(\PHP_EOL, $timetable)) > 160) {
+        \array_pop($timetable);
+    }
 
     $writer = new \XMLWriter();
     $writer->openMemory();
