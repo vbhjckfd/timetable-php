@@ -83,18 +83,18 @@ $app->post('/partners/startmobile', function(Request $request) use ($app) {
             $timetable[$row['route']] = [];
         }
 
-        $future = (new DateTime())->add(new \DateInterval('PT'. $row['seconds_left'] .'S'));
-        $diff = $future->diff(new \DateTime());
-
-        $timetable[$row['route']][] = $diff;
+        $timetable[$row['route']][] = $row['time_left'];
     });
 
     \ksort($timetable, \SORT_LOCALE_STRING);
 
     $timetable = array_map(function($key, $row) {
-        return $key . ': ' . \implode(', ', \array_map(function(\DateInterval $interval){
-            return $interval->format((0 == $interval->format('%i')) ? '< 1m' : '%im');
-        }, $row));
+        $result =  $key . ': ' . \implode(', ', $row);
+
+        $result = \str_replace(['Тр', 'А', 'Т', 'Н', 'хв'], ['Tp', 'A', 'T', 'H', 'm'], $result);
+        $result = \str_replace(' m', 'm', $result);
+
+        return $result;
     }, array_keys($timetable), $timetable);
     $timetable = \implode(\PHP_EOL, $timetable);
 
