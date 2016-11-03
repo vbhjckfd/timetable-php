@@ -71,7 +71,7 @@ $app->get('/stops/{id}/pdf', function($id) use($app) {
 $app->post('/partners/startmobile', function(Request $request) use ($app) {
     $xmlRequest = new \SimpleXMLElement($request->getContent());
 
-    $code = $xmlRequest->body;
+    $code = intval($xmlRequest->body, 10);
 
     $client = new GuzzleHttp\Client();
     $response = $client->request('GET', "https://lad.lviv.ua/api/stops/$code");
