@@ -1,5 +1,7 @@
 <?php
 
+\define('K_TCPDF_THROW_EXCEPTION_ERROR', true);
+
 require_once __DIR__.'/../vendor/autoload.php';
 
 use Symfony\Component\HttpFoundation\Response;
@@ -8,8 +10,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Endroid\QrCode\QrCode;
 
 \date_default_timezone_set('Europe/Kiev');
-
-define('K_TCPDF_THROW_EXCEPTION_ERROR', true);
 
 $app = new Silex\Application();
 
@@ -65,7 +65,7 @@ $app->get('/stops/{id}/pdf', function($id) use($app) {
     $pdf->SetFont('dinpro');
 
     $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
-    $pdf->Output('Stop_' . $data['code'] . '.pdf', 'I');
+    $pdf->Output($data['code'] . '.pdf', 'D');
 });
 
 $app->post('/partners/startmobile', function(Request $request) use ($app) {

@@ -16,7 +16,7 @@
                     <td width="5%"><img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Transparent.gif" width="1px" height="120px" /></td>
 
                     <td width="90%" style="text-align: center">
-                        <span style="text-transform: uppercase; color: white; font-size: 25px">{% if name|length < 40 %}Зупинка <br />{% endif %}{{ name|raw }}</span>
+                        <span style="color: white; font-size: 25px">{% if name|length < 40 %}ЗУПИНКА <br />{% endif %}{{ name|upper|raw }}</span>
                     </td>
 
                     <td width="5%">&nbsp;</td>
