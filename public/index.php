@@ -77,6 +77,10 @@ $app->post('/partners/startmobile', function(Request $request) use ($app) {
     $response = $client->request('GET', "https://lad.lviv.ua/api/stops/$code");
     $data = \json_decode($response->getBody(), true);
 
+    if(empty($data['timetable'])) {
+        return new Response('', Response::HTTP_SERVICE_UNAVAILABLE);
+    }
+
     $timetable = [];
     array_walk($data['timetable'], function($row) use (&$timetable) {
         if(!array_key_exists($row['route'], $timetable)) {
