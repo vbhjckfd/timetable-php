@@ -95,7 +95,7 @@ $app->post('/partners/startmobile', function(Request $request) use ($app) {
     $timetable = array_map(function($key, $row) {
         $result =  $key . ': ' . \implode(', ', \array_slice($row, 0, 2));
 
-        $result = \str_replace(['Тр', 'А', 'Т', 'Н', 'хв'], ['Tp', 'A', 'T', 'H', 'm'], $result);
+        $result = \str_replace(['Тр', 'А', 'Т', 'Н', 'хв', 'Трам.'], ['Tp', 'A', 'T', 'H', 'm', 'Tp'], $result);
         $result = \str_replace(' m', 'm', $result);
 
         return $result;
