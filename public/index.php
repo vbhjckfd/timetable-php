@@ -86,7 +86,7 @@ $app->get('/stops/{id}/pdf/{type}', function($id, $type) use($app) {
         $pdf->SetFont('dinpro');
 
         $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
-        $pdf->Output($data['code'] . '.pdf');
+        $pdf->Output($data['code'] . '.pdf', 'D');
     }
 
 
