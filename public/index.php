@@ -21,7 +21,7 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => __DIR__.'/../views',
 ));
 
-$app->get('/stops/{id}/pdf', function($id) use($app) {
+$app->get('/stops/{id}/pdf/{type}', function($id, $type) use($app) {
     $client = new GuzzleHttp\Client();
 
     $response = $client->request('GET', "https://lad.lviv.ua/api/stops/$id");
@@ -29,44 +29,68 @@ $app->get('/stops/{id}/pdf', function($id) use($app) {
     $data = \json_decode($response->getBody(), true);
     $code = ltrim($data['code'], '0');
 
-
-    $qrCode = new QrCode();
-    $qrCode
-        ->setText("https://lad.lviv.ua/stops/$code?utm_source=stop&utm_medium=qr-code")
-        ->setSize(220)
-        ->setPadding(0)
-        ->setErrorCorrection('high')
-        ->setForegroundColor(array('r' => 0, 'g' => 0, 'b' => 0, 'a' => 0))
-        ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
-        ->setImageType(QrCode::IMAGE_TYPE_PNG)
-    ;
-
-    $html = $app['twig']->render('stop-flyer.html', array(
-        'name' => $data['name'],
-        'qrCode' => $qrCode->getDataUri(),
-        'code' => $code,
-    ));
-
     array_map(function($fontName){
         TCPDF_FONTS::addTTFfont(__DIR__ . '/../fonts/' . $fontName, 'TrueTypeUnicode', '', 96);
     }, ['DINPro-Regular.ttf', 'DINPro-Bold Regular.ttf']);
 
-    $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, 'DLP', true, 'UTF-8', false, true);
+    if('qr' === $type) {
+        $qrCode = new QrCode();
+        $qrCode
+            ->setText("https://lad.lviv.ua/stops/$code?utm_source=stop&utm_medium=qr-code")
+            ->setSize(220)
+            ->setPadding(0)
+            ->setErrorCorrection('high')
+            ->setForegroundColor(array('r' => 0, 'g' => 0, 'b' => 0, 'a' => 0))
+            ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
+            ->setImageType(QrCode::IMAGE_TYPE_PNG)
+        ;
 
-    $pdf->SetPrintHeader(false);
-    $pdf->SetPrintFooter(false);
-    $pdf->SetAutoPageBreak(false);
-    $pdf->SetMargins(0, 0);
-    $pdf->setCellMargins(0, 0, 0, 0);
-    $pdf->setCellPaddings(0, 0, 0, 0);
-    $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-    $pdf->setFontSubsetting(true);
-    $pdf->AddPage();
-    $pdf->SetFont('dinpro');
+        $html = $app['twig']->render('stop-flyer.html', array(
+            'name' => $data['name'],
+            'qrCode' => $qrCode->getDataUri(),
+            'code' => $code,
+        ));
 
-    $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
-    $pdf->Output($data['code'] . '.pdf', 'D');
-});
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, 'DLP', true, 'UTF-8', false, true);
+
+        $pdf->SetPrintHeader(false);
+        $pdf->SetPrintFooter(false);
+        $pdf->SetAutoPageBreak(false);
+        $pdf->SetMargins(0, 0);
+        $pdf->setCellMargins(0, 0, 0, 0);
+        $pdf->setCellPaddings(0, 0, 0, 0);
+        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+        $pdf->setFontSubsetting(true);
+        $pdf->AddPage();
+        $pdf->SetFont('dinpro');
+
+        $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
+        $pdf->Output($data['code'] . '.pdf', 'D');
+    }
+    elseif('sign' === $type) {
+        $html = $app['twig']->render('stop-sign.html', array(
+            'code' => $code,
+        ));
+
+        $pdf = new TCPDF('L', PDF_UNIT, 'B8', true, 'UTF-8', false, true);
+
+        $pdf->SetPrintHeader(false);
+        $pdf->SetPrintFooter(false);
+        $pdf->SetAutoPageBreak(false);
+        $pdf->SetMargins(0, 0);
+        $pdf->setCellMargins(0, 0, 0, 0);
+        $pdf->setCellPaddings(0, 0, 0, 0);
+        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+        $pdf->setFontSubsetting(true);
+        $pdf->AddPage();
+        $pdf->SetFont('dinpro');
+
+        $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
+        $pdf->Output($data['code'] . '.pdf');
+    }
+
+
+})->value('type', 'qr');
 
 $app->post('/partners/startmobile', function(Request $request) use ($app) {
     $xmlRequest = new \SimpleXMLElement($request->getContent());
