@@ -45,7 +45,7 @@ $app->get('/stops/{id}/pdf/{type}', function($id, $type) use($app) {
             ->setImageType(QrCode::IMAGE_TYPE_PNG)
         ;
 
-        $html = $app['twig']->render('stop-flyer.html', array(
+        $html = $app['twig']->render('stop-flyer.html.twig', array(
             'name' => $data['name'],
             'qrCode' => $qrCode->getDataUri(),
             'code' => $code,
@@ -68,11 +68,48 @@ $app->get('/stops/{id}/pdf/{type}', function($id, $type) use($app) {
         $pdf->Output($data['code'] . '.pdf', 'D');
     }
     elseif('sign' === $type) {
-        $html = $app['twig']->render('stop-sign.html', array(
-            'code' => $code,
-        ));
+        // We need to group routes by vehicle type
+        $groupedRoutes = [
+            'bus' =>  [
+                'image' => 'http://i.imgur.com/L7SBH90.png',
+                'routes' => [],
+            ],
+            'tram' => [
+                'image' => 'http://i.imgur.com/zENYrdx.png',
+                'routes' => [],
+            ],
+            'trol' => [
+                'image' => 'http://i.imgur.com/zENYrdx.png',
+                'routes' => [],
+            ]
+        ];
+        foreach($data['routes'] as $routeName) {
+            $group = 'bus';
+            if(0 === strpos($routeName, 'Тp')) {
+                $group = 'trol';
+            } elseif (0 === strpos($routeName, 'Т')) {
+                $group = 'tram';
+            }
 
-        $pdf = new TCPDF('L', PDF_UNIT, 'B8', true, 'UTF-8', false, true);
+            $routeName = str_replace(['Нічний А', '-рем', 'Тр', 'А', 'Т'], ['N', '', 'T', 'A', 'T'], $routeName);
+            $routeName = preg_replace('/^N(\d{2})\s{1}(.+)/', '$1H', $routeName);
+            $routeName = preg_replace('/^\D{1}(\d{2})\s{1}(.+)/', '$1', $routeName);
+
+            if('bus' == $group) {
+                $routeName = preg_replace('/^0([1-6])$/', '$1A', $routeName);
+            }
+
+            $routeName = preg_replace('/^0(\d{1})/', '$1', $routeName);
+
+            $groupedRoutes[$group]['routes'][] = $routeName;
+        }
+
+        $html = $app['twig']->render('stop-sign.html.twig', [
+            'code' => $code,
+            'routes' => $groupedRoutes,
+        ]);
+
+        $pdf = new TCPDF('L', PDF_UNIT, [500 - 8, 350 - 8], true, 'UTF-8', false, true);
 
         $pdf->SetPrintHeader(false);
         $pdf->SetPrintFooter(false);
@@ -80,13 +117,12 @@ $app->get('/stops/{id}/pdf/{type}', function($id, $type) use($app) {
         $pdf->SetMargins(0, 0);
         $pdf->setCellMargins(0, 0, 0, 0);
         $pdf->setCellPaddings(0, 0, 0, 0);
-        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
         $pdf->setFontSubsetting(true);
         $pdf->AddPage();
         $pdf->SetFont('dinpro');
 
         $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
-        $pdf->Output($data['code'] . '.pdf', 'D');
+        $pdf->Output($data['code'] . '.pdf', 'I');
     }
 
 

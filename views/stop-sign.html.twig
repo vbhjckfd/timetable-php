@@ -1,0 +1,63 @@
+{% spaceless %}
+<table>
+
+    <tr>
+        <td colspan="2" style="font-size: 0px">
+            <img src="http://i.imgur.com/f9u9l43.gif" height="10px" width="1px" />
+        </td>
+    </tr>
+
+    <tr>
+        <td width="1%"><img src="http://i.imgur.com/f9u9l43.gif" height="570px" width="1px" /></td>
+        <td width="99%" style="font-size: 110px; line-height: 110px">
+            <table>
+                {% for routeGroup in routes %}
+
+                    {% if routeGroup.routes|length > 0 %}
+                    <tr>
+                        <td width="10%" align="left"><img width="120px" height="120px" src="{{ routeGroup.image }}" /></td>
+                        <td width="90%" align="justify">
+                            {% for routeNum in routeGroup.routes %}
+                                {% if 'H' in routeNum %}
+                                    <span style="background-color: black; color: white; font-size: 90px; padding: 5px">{{ routeNum }}</span>
+                                {% else %}
+                                    <span>{{ routeNum }}</span>
+                                {%  endif %}
+                                <span>&nbsp;</span>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+            <table>
+                <tr>
+                    <td width="25%" style="font-size: 0px;"></td>
+                    <td width="50%" style="font-size: 1px; background-color: black"></td>
+                    <td width="25%" style="font-size: 0px;"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+            <table>
+                <tr>
+                    <td width="100%" align="center" style="font-size: 180px; line-height: 180px">
+                        lad.lviv.ua/<b style="color: red">{{ code }}</b>
+                        <br />
+                        sms <b style="color: red">{{ code }}</b> на 2214
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+</table>
+{% endspaceless %}
