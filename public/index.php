@@ -83,6 +83,9 @@ $app->get('/stops/{id}/pdf/{type}', function($id, $type) use($app) {
                 'routes' => [],
             ]
         ];
+        
+        sort($data['routes']);
+
         foreach($data['routes'] as $routeName) {
             $group = 'bus';
             if(0 === strpos($routeName, 'Тp')) {
@@ -101,7 +104,10 @@ $app->get('/stops/{id}/pdf/{type}', function($id, $type) use($app) {
 
             $routeName = preg_replace('/^0(\d{1})/', '$1', $routeName);
 
-            $groupedRoutes[$group]['routes'][] = $routeName;
+            if(!in_array($routeName, $groupedRoutes[$group]['routes'], true)) {
+                $groupedRoutes[$group]['routes'][] = $routeName;
+            }
+
         }
 
         $html = $app['twig']->render('stop-sign.html.twig', [
@@ -109,7 +115,7 @@ $app->get('/stops/{id}/pdf/{type}', function($id, $type) use($app) {
             'routes' => $groupedRoutes,
         ]);
 
-        $pdf = new TCPDF('L', PDF_UNIT, [500 - 8, 350 - 8], true, 'UTF-8', false, true);
+        $pdf = new TCPDF('L', PDF_UNIT, [500 - 80, 350 - 80], true, 'UTF-8', false, true);
 
         $pdf->SetPrintHeader(false);
         $pdf->SetPrintFooter(false);
