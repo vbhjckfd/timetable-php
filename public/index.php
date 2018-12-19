@@ -13,7 +13,12 @@ use Endroid\QrCode\QrCode;
 
 $app = new Silex\Application();
 
+$app['debug'] = getenv('DEBUG') == 'true' ?: false;
+
 $app->error(function (\Exception $e, Request $request, $code) {
+    if (!$app['debug']) {
+        exit;
+    }
     return new Response($e->getMessage() . '<br /><pre>' . \print_r($e->getTrace(), 1) . '</pre>');
 });
 
@@ -84,6 +89,9 @@ $app->get('/stops/{id}/pdf/{type}', function($id, $type) use($app) {
             ]
         ];
         
+        $data['routes'] = array_map(function($i) {
+            return $i['name'];
+        }, $data['routes']);
         sort($data['routes']);
 
         foreach($data['routes'] as $routeName) {
