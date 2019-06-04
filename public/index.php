@@ -102,15 +102,15 @@ $app->get('/stops/{id}/pdf/{type}', function($id, $type) use($app) {
                 $group = 'tram';
             }
 
-            $routeName = str_replace(['Нічний А', '-рем', 'Тр', 'А', 'Т'], ['N', '', 'T', 'A', 'T'], $routeName);
-            $routeName = preg_replace('/^N(\d{2})\s{1}(.+)/', '$1H', $routeName);
-            $routeName = preg_replace('/^\D{1}(\d{2})\s{1}(.+)/', '$1', $routeName);
-
-            if('bus' == $group) {
-                $routeName = preg_replace('/^0([1-6])$/', '$1A', $routeName);
+            // Skip airport route
+            if (false !== strpos($routeName, 'Аеропорт')) {
+                continue;
             }
 
-            $routeName = preg_replace('/^0(\d{1})/', '$1', $routeName);
+            $routeName = str_replace(['Н', '-рем', 'Тр', 'А', 'Т'], ['N', '', 'T', 'A', 'T'], $routeName);
+            $routeName = preg_replace('/^N(\d{2})/', '$1H', $routeName);
+            $routeName = substr($routeName, 1);
+            $routeName = ltrim($routeName, 0);
 
             if(!in_array($routeName, $groupedRoutes[$group]['routes'], true)) {
                 $groupedRoutes[$group]['routes'][] = $routeName;
