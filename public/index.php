@@ -51,6 +51,10 @@ $app->get('/stops/{id}/pdf/{type}', function($id, $type) use ($app) {
         'trol' => [
             'image' => 'http://i.imgur.com/zENYrdx.png',
             'routes' => [],
+        ],
+        'airport' => [
+            'image' => 'https://i.imgur.com/zCe2gNR.png',
+            'routes' => [],
         ]
     ];
     
@@ -65,14 +69,16 @@ $app->get('/stops/{id}/pdf/{type}', function($id, $type) use ($app) {
             $group = 'trol';
         } elseif (0 === strpos($routeName, 'Т')) {
             $group = 'tram';
+        } elseif (false !== strpos($routeName, 'Аеропорт')) {
+            $group = 'airport';
         }
 
         // Skip airport route
         if (false !== strpos($routeName, 'Аеропорт')) {
-            continue;
+            $routeName = 'Ffffff';
         }
 
-        $routeName = str_replace(['Н', '-рем', 'Тр', 'А', 'Т'], ['N', '', 'T', 'A', 'T'], $routeName);
+        $routeName = str_replace(['Н', '-рем', 'Тр', 'А', 'Т', 'Ffffff'], ['N', '', 'T', 'A', 'T', ' Аеропорт LWO'], $routeName);
         $routeName = preg_replace('/^N(\d{2})/', '$1H', $routeName);
         $routeName = substr($routeName, 1);
         $routeName = ltrim($routeName, 0);

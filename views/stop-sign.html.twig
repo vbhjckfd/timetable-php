@@ -20,6 +20,8 @@
                             {% for routeNum in routeGroup.routes %}
                                 {% if 'H' in routeNum %}
                                     <span style="background-color: black; color: white; font-size: 85px; padding: 5px">{{ routeNum }}</span>
+                                {% elseif 'Airport' == routeNum %}
+                                    <span >Аеропорт LWO</span>
                                 {% else %}
                                     <span>{{ routeNum }}</span>
                                 {%  endif %}
